@@ -10,6 +10,12 @@ const UserSchema = new Schema({
   },
   usertype: {
     type: String,
+  },
+  authProvider: {
+    type: Object,
+  },
+  id: {
+    type: String,
   }
 });
 

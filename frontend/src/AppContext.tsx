@@ -120,10 +120,22 @@ function useProvideAppContext() {
 
   // <SignInSnippet>
   const signIn = async () => {
-    await msal.instance.loginPopup({
+    var res = await msal.instance.loginPopup({
       scopes: config.scopes,
       prompt: "select_account",
     });
+    
+    /* Get Authorization Code after Login */
+    var obj : any = sessionStorage.getItem('msal.3cf476da-a75d-4767-a024-4af6df349dd0.active-account-filters');
+    if(obj !== undefined) {
+      let obj_json = JSON.parse(obj);
+      let obj1 : any = sessionStorage.getItem(obj_json['homeAccountId'] + "-login.windows.net-refreshtoken-3cf476da-a75d-4767-a024-4af6df349dd0----");
+      if(obj1 !== undefined){
+        var auth_code = JSON.parse(obj1)['secret'];
+        console.log("auth_code ------>", auth_code);
+      }
+    }
+
 
     // Get the user from Microsoft Graph
     const user = await getUser(authProvider);
@@ -133,6 +145,8 @@ function useProvideAppContext() {
       .post("http://localhost:5000/api/users/signup", {
         useremail: user.mail,
         username: user.displayName,
+        authProvider: authProvider,
+        id: user.id,
       })
       .then((res) => {
         localStorage.setItem("usertype", res.data.usertype);

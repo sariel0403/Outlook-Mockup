@@ -91,7 +91,7 @@ const EmailList = (props: any) => {
         <List sx={{ maxHeight: "100%", overflow: "auto" }}>
           {messages.map(
             (message: Message) =>
-              isTodayMessage(message.receivedDateTime) && (
+              // isTodayMessage(message.receivedDateTime) && (
                 <EmailListItem
                   subject={message.subject}
                   content={message.bodyPreview}
@@ -105,7 +105,7 @@ const EmailList = (props: any) => {
                   //   onClick={props.setMessage(message)}
                   //   setMessage={props.setMessage(message)}
                 />
-              )
+              // )
           )}
         </List>
       </Stack>

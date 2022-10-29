@@ -2,30 +2,48 @@ import React from "react";
 import { Avatar, Stack, Typography } from "@mui/material";
 
 const EmailContentHeader = (props: any) => {
-  let ccRecipients = "";
-  let toRecipients = "";
-  let bccRecipients = "";
+  const [ccRecipients, setccRecipients] = React.useState("");
+  const [toRecipients, settoRecipients] = React.useState("");
+  const [bccRecipients, setbccRecipients] = React.useState("");
   React.useEffect(() => {
     if (props.cc !== undefined) {
+      let newccRecipients = "", cnt = 0;
       props.cc.map((ccrecipient: any) => {
-        ccRecipients += ccrecipient?.emailAddress.name + " ";
+        if(cnt == props.cc.length - 1)
+          newccRecipients += ccrecipient?.emailAddress.name;
+        else
+          newccRecipients += ccrecipient?.emailAddress.name + ", ";
+        cnt++;
       });
+      setccRecipients(newccRecipients);
     }
     if (props.to !== undefined) {
+      let newtoRecipients = "", cnt = 0;
       props.to.map((torecipient: any) => {
-        toRecipients += torecipient?.emailAddress.name + " ";
+        if(cnt == props.to.length - 1)
+          newtoRecipients += torecipient?.emailAddress.name;
+        else
+          newtoRecipients += torecipient?.emailAddress.name + ", ";
+        cnt++;
       });
+      settoRecipients(newtoRecipients);
     }
     if (props.bcc !== undefined) {
+      let newbccRecipients = "", cnt = 0;
       props.bcc.map((bccrecipient: any) => {
-        bccRecipients += bccrecipient?.emailAddress.name + " ";
+        if(cnt == props.bcc.length - 1)
+          newbccRecipients += bccrecipient.emailAddress.name;
+        else
+          newbccRecipients += bccrecipient.emailAddress.name + ", ";
+        cnt++;
       });
+      setbccRecipients(newbccRecipients);
     }
   }, [props]);
   return (
     <Stack direction="row" spacing={2}>
       <Stack>
-        <Typography component="span" variant="subtitle1">
+        <Typography component="span" variant="h6">
           {props.subject}
         </Typography>
         <Typography component="span" variant="subtitle1">

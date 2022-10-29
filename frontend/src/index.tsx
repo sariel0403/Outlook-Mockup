@@ -22,7 +22,6 @@ const msalInstance = new PublicClientApplication({
   auth: {
     clientId: config.appId,
     redirectUri: config.redirectUri,
-    // authority: config.authority,
   },
   cache: {
     cacheLocation: "sessionStorage",

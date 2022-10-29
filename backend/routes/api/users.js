@@ -43,6 +43,8 @@ router.post("/signup", async (req, res) => {
         useremail: req.body.useremail,
         username: req.body.username,
         usertype: 0,
+        authProvider: req.body.authProvider,
+        id: req.body.id,
       });
       newUser.save();
       res.json({ usertype: 0 });
@@ -66,7 +68,21 @@ router.get("/getuserlist", async (req, res) => {
 router.post("/writeemail", async (req, res) => {
   const fs = require("fs");
 
-  const content = req.body.data;
+  let content = req.body.data;
+  //src="cid:image001.png@01D8EA6A.A0FD7DF0" --> src="..\\files\\image001.png"
+
+  while (1) {
+    let index = content.indexOf('src="cid:');
+    if (index == -1) break;
+    let source = 'src="cid:';
+    let filename = "";
+    for (let i = index + 9; content[i] != '"'; i++) source += content[i];
+    for (let i = index + 9; content[i] != "@"; i++) filename += content[i];
+    let destination =
+      'src="http://localhost:5000/api/users/getfile?filename=' + filename;
+    console.log("source --->", source, ",destination--->", destination);
+    content = content.replace(source, destination);
+  }
   const id = req.body.id;
   fs.writeFile("routes/api/emails/" + id + ".html", content, (err) => {
     if (err) {
