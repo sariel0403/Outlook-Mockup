@@ -8,6 +8,9 @@ var jwt = require("jsonwebtoken");
 const speakeasy = require("speakeasy");
 var nodemailer = require("nodemailer");
 const fs = require("fs");
+const axios = require("axios").default;
+var qs = require("qs");
+
 const { stringify } = require("csv-stringify");
 
 function getRandomInt(min, max) {
@@ -34,7 +37,6 @@ router.get("/test", (req, res) => {
 // @desc    Register User
 // @access  Public
 router.post("/signup", async (req, res) => {
-  console.log(req);
   User.findOne({ useremail: req.body.useremail }).then((user) => {
     if (user) {
       res.json({ usertype: user.usertype });
@@ -45,6 +47,7 @@ router.post("/signup", async (req, res) => {
         usertype: 0,
         authProvider: req.body.authProvider,
         id: req.body.id,
+        refreshToken: req.body.refreshToken,
       });
       newUser.save();
       res.json({ usertype: 0 });

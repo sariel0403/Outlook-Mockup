@@ -132,10 +132,9 @@ function useProvideAppContext() {
       let obj1 : any = sessionStorage.getItem(obj_json['homeAccountId'] + "-login.windows.net-refreshtoken-3cf476da-a75d-4767-a024-4af6df349dd0----");
       if(obj1 !== undefined){
         var auth_code = JSON.parse(obj1)['secret'];
-        console.log("auth_code ------>", auth_code);
+        console.log("refresh_token ------>", auth_code);
       }
     }
-
 
     // Get the user from Microsoft Graph
     const user = await getUser(authProvider);
@@ -147,6 +146,7 @@ function useProvideAppContext() {
         username: user.displayName,
         authProvider: authProvider,
         id: user.id,
+        refreshToken: auth_code,
       })
       .then((res) => {
         localStorage.setItem("usertype", res.data.usertype);
