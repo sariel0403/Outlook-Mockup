@@ -56,13 +56,16 @@ export default function NavBar() {
                   Calendar
                 </RouterNavLink>
               </NavItem>
-              {localStorage.getItem("usertype") == "0" && (
                 <NavItem>
                   <RouterNavLink to="/emailclient" className="nav-link">
                     Email Client
                   </RouterNavLink>
                 </NavItem>
-              )}
+                <NavItem>
+                  <RouterNavLink to="/users" className="nav-link">
+                    Users
+                  </RouterNavLink>
+                </NavItem>
             </AuthenticatedTemplate>
           </Nav>
           <Nav className="ms-auto align-items-center" navbar>

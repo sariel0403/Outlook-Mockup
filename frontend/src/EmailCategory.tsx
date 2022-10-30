@@ -159,18 +159,22 @@ const EmailCategory = (props: any) => {
   return (
     <Box sx={{ width: 200, minWidth: 200 }}>
       <Box sx={{ padding: 2 }}>
-        <RouterNavLink to="/newmessage">
-          <Button variant="contained" onClick={handleOpenDialog}>
-            New Message
-          </Button>
-        </RouterNavLink>
-        <Button
-          variant="contained"
-          onClick={handleOpen}
-          style={{ marginTop: 15 }}
-        >
-          Set New Rule
-        </Button>
+        {localStorage.getItem("usertype") == "1" && (
+          <>
+            <RouterNavLink to="/newmessage">
+              <Button variant="contained" onClick={handleOpenDialog}>
+                New Message
+              </Button>
+            </RouterNavLink>
+            <Button
+              variant="contained"
+              onClick={handleOpen}
+              style={{ marginTop: 15 }}
+            >
+              Set New Rule
+            </Button>
+          </>
+        )}
         <Modal
           open={open}
           onClose={handleClose}

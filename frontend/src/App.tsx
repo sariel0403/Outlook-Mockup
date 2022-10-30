@@ -18,6 +18,7 @@ import NewMessage from "./NewMessage";
 import { hot } from "react-hot-loader/root";
 import ReplyMessage from "./ReplyMessage";
 import ForwardMessage from "./ForwardMessage";
+import UserSection from "./UserSection";
 
 // import {Calendar, momentLocalizer} from 'react-big-calendar';
 
@@ -46,6 +47,7 @@ const App = ({ pca }: AppProps): JSX.Element => {
               <Route path="/newmessage" element={<NewMessage />} />
               <Route path="/replymessage" element={<ReplyMessage />} />
               <Route path="/forwardmessage" element={<ForwardMessage />} />
+              <Route path="/users" element={<UserSection />} />
             </Routes>
           </Container>
         </Router>

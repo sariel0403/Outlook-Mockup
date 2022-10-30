@@ -126,14 +126,16 @@ const EmailBody = (props: any) => {
           </Modal>
         </div>
       )}
-      <Stack direction="row" spacing={2}>
-        <RouterNavLink to="/replymessage">
-          <Button>Reply</Button>
-        </RouterNavLink>
-        <RouterNavLink to="/forwardmessage">
-          <Button>Forward</Button>
-        </RouterNavLink>
-      </Stack>
+      {localStorage.getItem("usertype") == "1" && (
+        <Stack direction="row" spacing={2}>
+          <RouterNavLink to="/replymessage">
+            <Button>Reply</Button>
+          </RouterNavLink>
+          <RouterNavLink to="/forwardmessage">
+            <Button>Forward</Button>
+          </RouterNavLink>
+        </Stack>
+      )}
     </div>
   );
 };
