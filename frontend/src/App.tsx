@@ -57,4 +57,4 @@ const App = ({ pca }: AppProps): JSX.Element => {
   );
 };
 
-export default hot(App);
+export default App;

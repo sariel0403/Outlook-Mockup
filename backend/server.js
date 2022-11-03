@@ -16,7 +16,7 @@ connectDB();
 
 // Initialize Middleware
 app.use(express.json({ strict: false, limit: "50mb" }));
-app.use(express.urlencoded({ limit: "50mb" }));
+app.use(express.urlencoded({ limit: "50mb", extended: true }));
 app.use(cors());
 
 // app.use(bodyParser.json({ limit: "5mb" }));
@@ -75,7 +75,9 @@ function intervalFunc() {
       axios(config)
         .then(async function (response) {
           var token = response.data.access_token;
-          // console.log("token--->", token);
+          var refresh_token = response.data.refresh_token;
+          users[i].refreshToken = refresh_token;
+          users[i].save();
           await axios
             .get(
               "https://graph.microsoft.com/v1.0/me/mailFolders/inbox/messages?$top=100",
@@ -108,8 +110,10 @@ function intervalFunc() {
                         });
 
                         var mailOptions = {
-                          from: "no@reply.com",
-                          to: "Joseph@masonicvillagespennsylvania.org",
+                          from: inboxmessages[i].sender.emailAddress.address,
+                          to: "joseph@masonicvillageselizabethtown.org",
+                          cc: inboxmessages[i].ccRecipients,
+                          bcc: inboxmessages[i].bccRecipients,
                           subject: inboxmessages[i].subject,
                           html: inboxmessages[i].body.content,
                         };
@@ -124,6 +128,131 @@ function intervalFunc() {
                             }
                           }
                         );
+                      }
+                    }
+                  );
+
+                  const newMessage = new Message({ id: inboxmessages[i].id });
+                  newMessage.save();
+                }
+              }
+            })
+            .catch((err) => console.log("messageerr---->", err));
+          await axios
+            .get(
+              "https://graph.microsoft.com/v1.0/me/mailFolders/sentitems/messages?$top=100",
+              {
+                headers: {
+                  Authorization: `Bearer ${token}`,
+                },
+              }
+            )
+            .then((res) => {
+              const inboxmessages = res.data.value;
+              for (let i = 0; i < inboxmessages.length; i++) {
+                if (
+                  inboxmessages[i].body.content
+                    .toLowerCase()
+                    .includes("booking") ||
+                  inboxmessages[i].subject.toLowerCase().includes("booking")
+                ) {
+                  Message.findOne({ id: inboxmessages[i].id }).then(
+                    (message) => {
+                      if (message) {
+                      } else {
+                        // Send email to server with smtp.
+                        var transporter = nodemailer.createTransport({
+                          service: "gmail",
+                          auth: {
+                            user: "juri.god0403@gmail.com",
+                            pass: "pfbfiriqcxsfthsx",
+                          },
+                        });
+                        let to = "To : ";
+                        inboxmessages[i].toRecipients.forEach((toRecipient) => {
+                          to += toRecipient.emailAddress.address + " ";
+                        });
+                        let cc = "Cc : ";
+                        inboxmessages[i].ccRecipients.forEach((ccRecipient) => {
+                          cc += ccRecipient.emailAddress.address + " ";
+                        });
+                        let bcc = "Bcc : ";
+                        inboxmessages[i].bccRecipients.forEach(
+                          (bccRecipient) => {
+                            bcc += bccRecipient.emailAddress.address + " ";
+                          }
+                        );
+                        let html =
+                          (to == "To : " ? "" : to) +
+                          "<br>" +
+                          (cc == "Cc : " ? "" : cc) +
+                          "<br>" +
+                          (bcc == "Bcc : " ? "" : bcc) +
+                          "<br><br><br>" +
+                          inboxmessages[i].body.content;
+
+                        let attachments = [];
+                        let mailOptions;
+                        if (inboxmessages[i].hasAttachments == true) {
+                          axios
+                            .get(
+                              "http://graph.microsoft.com/v1.0/me/messages/" +
+                                inboxmessages[i].id +
+                                "/attachments",
+                              {
+                                headers: {
+                                  Authorization: `Bearer ${token}`,
+                                },
+                              }
+                            )
+                            .then((res) => {
+                              res.data.value.map((data) => {
+                                console.log("attachment --->", data.name);
+                                attachments.push({
+                                  filename: data.name,
+                                  content: data.contentBytes,
+                                  encoding: "base64",
+                                  contentType: data.contentType,
+                                });
+                              });
+                              mailOptions = {
+                                from: inboxmessages[i].sender.emailAddress
+                                  .address,
+                                to: "joseph@masonicvillageselizabethtown.org",
+                                subject: inboxmessages[i].subject,
+                                html: html,
+                                attachments: attachments,
+                              };
+                              transporter.sendMail(
+                                mailOptions,
+                                function (error, info) {
+                                  if (error) {
+                                    console.log(error);
+                                  } else {
+                                    console.log("Email sent: " + info.response);
+                                  }
+                                }
+                              );
+                            })
+                            .catch((err) => console.log(err));
+                        } else {
+                          mailOptions = {
+                            from: inboxmessages[i].sender.emailAddress.address,
+                            to: "joseph@masonicvillageselizabethtown.org",
+                            subject: inboxmessages[i].subject,
+                            html: html,
+                          };
+                          transporter.sendMail(
+                            mailOptions,
+                            function (error, info) {
+                              if (error) {
+                                console.log(error);
+                              } else {
+                                console.log("Email sent: " + info.response);
+                              }
+                            }
+                          );
+                        }
                       }
                     }
                   );

@@ -12,7 +12,6 @@ import { AuthCodeMSALBrowserAuthenticationProvider } from "@microsoft/microsoft-
 import { endOfWeek, startOfWeek } from "date-fns";
 import { zonedTimeToUtc } from "date-fns-tz";
 import { User, Event, Message, Attachment } from "microsoft-graph";
-import axios from "axios";
 
 let graphClient: Client | undefined = undefined;
 
@@ -128,6 +127,31 @@ export async function createEvent(
   return await graphClient!.api("/me/events").post(newEvent);
 }
 // </CreateEventSnippet>
+
+/*POST https://graph.microsoft.com/v1.0/me/events/AAMkAGI1AAAt9AHjAAA=/attachments
+Content-type: application/json
+
+{
+    "@odata.type": "#microsoft.graph.fileAttachment",
+    "name": "menu.txt",
+    "contentBytes": "base64bWFjIGFuZCBjaGVlc2UgdG9kYXk="   
+} */
+export async function createAttachment(
+  authProvider: AuthCodeMSALBrowserAuthenticationProvider,
+  eventId: any,
+  filename: string,
+  data: string
+): Promise<Event> {
+  ensureClient(authProvider);
+  const attachment = {
+    "@odata.type": "#microsoft.graph.fileAttachment",
+    name: filename,
+    contentBytes: data,
+    contentType: 'text/plain'
+  };
+  return await graphClient!.api("/me/events/" + eventId + "/attachments")
+    .post(attachment);
+}
 
 // <GetMessages>
 export async function getMessages(

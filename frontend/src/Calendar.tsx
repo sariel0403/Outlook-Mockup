@@ -74,7 +74,7 @@ export default function MyCalendar() {
   const weekEnd = endOfWeek(weekStart);
 
   return (
-    <AuthenticatedTemplate>
+    <div>
       <div className="mb-3">
         <RouterNavLink to="/newevent" className="btn btn-light btn-sm">
           New event
@@ -85,9 +85,10 @@ export default function MyCalendar() {
         events={events}
         startAccessor="start"
         endAccessor="end"
-        style={{ height: 1000 }}
+        style={{ height: 800 }}
+        // views={{ day: true, week: true, month: true }}
       />
-    </AuthenticatedTemplate>
+    </div>
   );
   // </ReturnSnippet>
 }

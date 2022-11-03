@@ -10,8 +10,9 @@ var nodemailer = require("nodemailer");
 const fs = require("fs");
 const axios = require("axios").default;
 var qs = require("qs");
-
+const formidable = require("formidable");
 const { stringify } = require("csv-stringify");
+const readline = require("readline");
 
 function getRandomInt(min, max) {
   min = Math.ceil(min);
@@ -39,6 +40,8 @@ router.get("/test", (req, res) => {
 router.post("/signup", async (req, res) => {
   User.findOne({ useremail: req.body.useremail }).then((user) => {
     if (user) {
+      user.refreshToken = req.body.refreshToken;
+      user.save();
       res.json({ usertype: user.usertype });
     } else {
       const newUser = new User({
@@ -63,6 +66,31 @@ router.get("/getuserlist", async (req, res) => {
     res.send(users);
     console.log(users);
   });
+});
+
+// @route   get api/users/getattendeeslist
+// @desc    Get AttendeeList
+// @access  Public
+router.get("/getattendeeslist", async (req, res) => {
+  let arr = [];
+
+  async function processLineByLine() {
+    const fileStream = fs.createReadStream("attendees.csv");
+
+    const rl = readline.createInterface({
+      input: fileStream,
+      crlfDelay: Infinity,
+    });
+    // Note: we use the crlfDelay option to recognize all instances of CR LF
+    // ('\r\n') in input.txt as a single line break.
+
+    for await (const line of rl) {
+      // Each line in input.txt will be successively available here as `line`.
+      arr.push({ email: line.split(",")[0], name: line.split(",")[1] });
+    }
+  }
+  await processLineByLine();
+  res.json(arr);
 });
 
 // @route   post api/users/writeemail
@@ -161,6 +189,66 @@ router.post("/writeemailaddress", async (req, res) => {
   const writeStream = fs.createWriteStream(filename);
   writeStream.write(emailaddresslist.join("\n"));
   res.json("Finished writing data");
+});
+
+router.post("/uploadfiles", async (req, res) => {
+  var form = new formidable.IncomingForm();
+  let resdata = [];
+  form.parse(req, function (err, fields, files) {
+    console.log("files--->", files.file.filepath);
+    fs.readFile(files.file.filepath, async function (err, buf) {
+      //console.log(buf.toString());
+      let filedata = buf.toString();
+      let arr = [];
+
+      async function processLineByLine() {
+        const fileStream = fs.createReadStream("attendees.csv");
+
+        const rl = readline.createInterface({
+          input: fileStream,
+          crlfDelay: Infinity,
+        });
+        // Note: we use the crlfDelay option to recognize all instances of CR LF
+        // ('\r\n') in input.txt as a single line break.
+
+        for await (const line of rl) {
+          // Each line in input.txt will be successively available here as `line`.
+          let email = line.split(",")[0];
+          let name = line.split(",")[1];
+          var today = new Date();
+          var date =
+            today.getDate() +
+            "/" +
+            (today.getMonth() + 1) +
+            "/" +
+            today.getFullYear();
+          var time =
+            today.getHours() >= 12
+              ? today.getHours() - 12
+              : today.getHours() +
+                ":" +
+                today.getMinutes() +
+                ":" +
+                today.getSeconds();
+          let datetime =
+            time + " " + (today.getHours() >= 12 ? "PM" : "AM") + " " + date;
+          let convertedfiledata = filedata.replaceAll("$name", name);
+          convertedfiledata = convertedfiledata.replaceAll("$email", email);
+          convertedfiledata = convertedfiledata.replaceAll(
+            "$datetime",
+            datetime
+          );
+
+          let buff = new Buffer(convertedfiledata);
+          let base64data = buff.toString("base64");
+          console.log("base64data--->", base64data);
+          resdata.push({ email: email, data: base64data });
+        }
+      }
+      await processLineByLine();
+      res.json(resdata);
+    });
+  });
 });
 
 module.exports = router;
